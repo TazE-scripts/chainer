@@ -1,0 +1,26 @@
+{$DEFINE SCRIPT_CHAIN}
+{$I WaspLib/osr.simba}
+
+begin
+  Login.PlayerIndex := 0;
+  WLSettings.RemoteInput.HUDReport := False;
+end;
+
+procedure TAntiban.Setup(); override;
+begin
+  Antiban.AddBreak(20 * ONE_SECOND, 15 * ONE_SECOND, 0, 0);
+  inherited;
+end;
+
+{$SCOPEDENUMS ON}
+  {$I ./scriptA.simba}
+  {$I ./scriptB.simba}
+{$SCOPEDENUMS OFF}
+
+begin
+  while True do
+  begin
+    scriptA.Run(WLSettings.MaxActions, WLSettings.MaxTime);  //Main function of the first script
+    scriptB.Run(WLSettings.MaxActions, WLSettings.MaxTime);   //Main function of the second script
+  end;
+end.

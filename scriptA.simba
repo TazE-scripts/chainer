@@ -1,0 +1,50 @@
+{$I WaspLib/osr.simba}
+
+type
+  EStateA = (WORKER_A, BREAK_A);
+
+  TScriptA = record(TBaseBankScript)
+    State: EStateA;
+    counter: Integer;
+  end;
+
+procedure TScriptA.Init(maxActions: UInt32; maxTime: UInt64); override;
+begin
+  inherited;
+  Self.counter := 0;
+  Self.RSW.SetupNamedRegion();
+end;
+
+function TScriptA.GetState(): EStateA;
+begin
+  if (counter < 5) then
+    Exit(EStateA.WORKER_A);
+
+  Exit(EStateA.BREAK_A);
+end;
+
+procedure TScriptA.Run(maxActions: UInt32; maxTime: UInt64);
+begin
+  Self.Init(maxActions, maxTime);
+
+  repeat
+    Self.State := Self.GetState();
+    Self.SetAction(ToStr(Self.State));
+
+    case Self.State of
+      EStateA.WORKER_A:
+        begin
+          writeln(counter, " Doing stuff: Worker A");
+          Inc(counter);
+          Wait(1000);
+        end;
+      EStateA.BREAK_A: Break;
+    end;
+
+    Self.DoAntiban();
+  until Self.ShouldStop();
+  if not Self.Terminate() then Exit;
+end;
+
+var
+  ScriptA: TScriptA;
